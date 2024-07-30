@@ -1,6 +1,8 @@
 package com.atguigu.daijia.customer.controller;
 
+import com.atguigu.daijia.common.login.GuiguLogin;
 import com.atguigu.daijia.common.result.Result;
+import com.atguigu.daijia.common.util.AuthContextHolder;
 import com.atguigu.daijia.customer.service.CustomerService;
 import com.atguigu.daijia.model.vo.customer.CustomerLoginVo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,10 +26,12 @@ public class CustomerController {
         return Result.ok(customerInfoService.login(code));
     }
     @Operation(summary = "获取客户登录信息")
+    @GuiguLogin
     @GetMapping("/getCustomerLoginInfo")
-    public Result<CustomerLoginVo> getCustomerLoginInfo(@RequestHeader(value = "token") String token) {
+    public Result<CustomerLoginVo> getCustomerLoginInfo() {
+        Long customerId = AuthContextHolder.getUserId();
         //调用service
-        CustomerLoginVo customerLoginVo = customerInfoService.getCustomerLoginInfo(token);
+        CustomerLoginVo customerLoginVo = customerInfoService.getCustomerInfo(customerId);
 
         return Result.ok(customerLoginVo);
     }
