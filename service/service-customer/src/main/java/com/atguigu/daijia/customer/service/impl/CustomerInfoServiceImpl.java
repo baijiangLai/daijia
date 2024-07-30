@@ -2,6 +2,8 @@ package com.atguigu.daijia.customer.service.impl;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
+import com.alibaba.fastjson.JSON;
 import com.atguigu.daijia.common.execption.GuiguException;
 import com.atguigu.daijia.common.result.ResultCodeEnum;
 import com.atguigu.daijia.customer.mapper.CustomerInfoMapper;
@@ -9,10 +11,12 @@ import com.atguigu.daijia.customer.mapper.CustomerLoginLogMapper;
 import com.atguigu.daijia.customer.service.CustomerInfoService;
 import com.atguigu.daijia.model.entity.customer.CustomerInfo;
 import com.atguigu.daijia.model.entity.customer.CustomerLoginLog;
+import com.atguigu.daijia.model.form.customer.UpdateWxPhoneForm;
 import com.atguigu.daijia.model.vo.customer.CustomerLoginVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -85,5 +89,24 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoMapper, Cus
 
         //3 CustomerLoginVo返回
         return customerLoginVo;
+    }
+
+    @Override
+    public Boolean updateWxPhoneNumber(UpdateWxPhoneForm updateWxPhoneForm) {
+        // 调用微信 API 获取用户的手机号
+        WxMaPhoneNumberInfo phoneInfo = null;
+        try {
+            phoneInfo = wxMaService.getUserService().getPhoneNoInfo(updateWxPhoneForm.getCode());
+            String phoneNumber = phoneInfo.getPhoneNumber();
+            log.info("phoneInfo:{}", JSON.toJSONString(phoneInfo));
+
+            CustomerInfo customerInfo = new CustomerInfo();
+            customerInfo.setId(updateWxPhoneForm.getCustomerId());
+            customerInfo.setPhone(phoneNumber);
+            return customerInfoMapper.updateById(customerInfo) > 0;
+        } catch (WxErrorException e) {
+            throw new GuiguException(ResultCodeEnum.DATA_ERROR);
+        }
+
     }
 }
