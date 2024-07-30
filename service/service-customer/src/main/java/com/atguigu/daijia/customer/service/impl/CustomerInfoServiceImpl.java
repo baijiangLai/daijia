@@ -9,11 +9,14 @@ import com.atguigu.daijia.customer.mapper.CustomerLoginLogMapper;
 import com.atguigu.daijia.customer.service.CustomerInfoService;
 import com.atguigu.daijia.model.entity.customer.CustomerInfo;
 import com.atguigu.daijia.model.entity.customer.CustomerLoginLog;
+import com.atguigu.daijia.model.vo.customer.CustomerLoginVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -64,5 +67,23 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoMapper, Cus
         customerLoginLog.setMsg("小程序登录");
         customerLoginLogMapper.insert(customerLoginLog);
         return customerInfo.getId();
+    }
+
+    //获取客户登录信息
+    @Override
+    public CustomerLoginVo getCustomerInfo(Long customerId) {
+        //1 根据用户id查询用户信息
+        CustomerInfo customerInfo = customerInfoMapper.selectById(customerId);
+
+        //2 封装到CustomerLoginVo
+        CustomerLoginVo customerLoginVo = new CustomerLoginVo();
+        BeanUtils.copyProperties(customerInfo,customerLoginVo);
+
+        String phone = customerInfo.getPhone();
+        boolean isBindPhone = StringUtils.hasText(phone);
+        customerLoginVo.setIsBindPhone(isBindPhone);
+
+        //3 CustomerLoginVo返回
+        return customerLoginVo;
     }
 }
