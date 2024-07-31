@@ -14,13 +14,19 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Slf4j
 @Tag(name = "腾讯云识别接口管理")
 @RestController
 @RequestMapping(value="/ocr")
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class OcrController {
-	
 
+    @Autowired
+    private OcrService ocrService;
+
+    @Operation(summary = "身份证识别")
+    @PostMapping("/idCardOcr")
+    public Result<IdCardOcrVo> idCardOcr(@RequestPart("file") MultipartFile file) {
+        IdCardOcrVo idCardOcrVo = ocrService.idCardOcr(file);
+        return Result.ok(idCardOcrVo);
+    }
 }
-
