@@ -27,6 +27,5 @@ public class CosController {
         CosUploadVo cosUploadVo = cosService.upload(file,path);
         return Result.ok(cosUploadVo);
     }
-
 }
 
