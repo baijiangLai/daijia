@@ -2,6 +2,7 @@ package com.atguigu.daijia.driver.controller;
 
 import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.driver.service.DriverInfoService;
+import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
 import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
 import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
 import com.atguigu.daijia.model.vo.driver.DriverLoginVo;
@@ -45,6 +46,14 @@ public class DriverInfoController {
     @PostMapping("/updateDriverAuthInfo")
     public Result<Boolean> updateDriverAuthInfo(@RequestBody UpdateDriverAuthInfoForm updateDriverAuthInfoForm) {
         Boolean isSuccess = driverInfoService.updateDriverAuthInfo(updateDriverAuthInfoForm);
+        return Result.ok(isSuccess);
+    }
+
+    //创建司机人脸模型
+    @Operation(summary = "创建司机人脸模型")
+    @PostMapping("/creatDriverFaceModel")
+    public Result<Boolean> creatDriverFaceModel(@RequestBody DriverFaceModelForm driverFaceModelForm) {
+        Boolean isSuccess = driverInfoService.creatDriverFaceModel(driverFaceModelForm);
         return Result.ok(isSuccess);
     }
 
