@@ -20,14 +20,24 @@ public class CosController {
     @Autowired
     private CosService cosService;
 
+//    //文件上传接口
+//    @Operation(summary = "上传")
+//    //@GuiguLogin
+//    @PostMapping("/upload")
+//    public Result<CosUploadVo> upload(@RequestPart("file") MultipartFile file,
+//                                      @RequestParam(name = "path",defaultValue = "auth") String path) {
+//        CosUploadVo cosUploadVo = cosService.uploadFile(file,path);
+//        return Result.ok(cosUploadVo);
+//    }
+
     //文件上传接口
     @Operation(summary = "上传")
     //@GuiguLogin
     @PostMapping("/upload")
-    public Result<CosUploadVo> upload(@RequestPart("file") MultipartFile file,
+    public Result<String> upload(@RequestPart("file") MultipartFile file,
                                       @RequestParam(name = "path",defaultValue = "auth") String path) {
         CosUploadVo cosUploadVo = cosService.uploadFile(file,path);
-        return Result.ok(cosUploadVo);
+        return Result.ok(cosUploadVo.getShowUrl());
     }
 }
 
