@@ -323,29 +323,33 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean startDriver(StartDriveForm startDriveForm) {
-        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(OrderInfo::getId, startDriveForm.getOrderId());
-        queryWrapper.eq(OrderInfo::getDriverId, startDriveForm.getDriverId());
+        //根据订单id  +  司机id  更新订单状态  和 开始代驾时间
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderInfo::getId,startDriveForm.getOrderId());
+        wrapper.eq(OrderInfo::getDriverId,startDriveForm.getDriverId());
 
-        OrderInfo updateOrderInfo = new OrderInfo();
-        updateOrderInfo.setStatus(OrderStatus.START_SERVICE.getStatus());
-        updateOrderInfo.setStartServiceTime(new Date());
-        //只能更新自己的订单
-        int row = orderInfoMapper.update(updateOrderInfo, queryWrapper);
-        if(row == 1) {
-            //记录日志
-            this.log(startDriveForm.getOrderId(), OrderStatus.START_SERVICE.getStatus());
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setStatus(OrderStatus.START_SERVICE.getStatus());
+        orderInfo.setStartServiceTime(new Date());
+
+        int rows = orderInfoMapper.update(orderInfo, wrapper);
+        if(rows == 1) {
+            return true;
         } else {
             throw new GuiguException(ResultCodeEnum.UPDATE_ERROR);
         }
+    }
 
-        //初始化订单监控统计数据
-        OrderMonitor orderMonitor = new OrderMonitor();
-        orderMonitor.setOrderId(startDriveForm.getOrderId());
-        orderMonitorService.saveOrderMonitor(orderMonitor);
-        return true;
+
+    @Override
+    public Long getOrderNumByTime(String startTime, String endTime) {
+        // 09 <= time < 10   <= time1  <    11
+        LambdaQueryWrapper<OrderInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.ge(OrderInfo::getStartServiceTime,startTime);
+        wrapper.lt(OrderInfo::getStartServiceTime,endTime);
+        Long count = orderInfoMapper.selectCount(wrapper);
+        return count;
     }
 }
