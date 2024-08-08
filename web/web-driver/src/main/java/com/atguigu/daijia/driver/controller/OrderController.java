@@ -32,6 +32,7 @@ public class OrderController {
     @GetMapping("/searchCustomerCurrentOrder")
     public Result<CurrentOrderInfoVo> searchCustomerCurrentOrder() {
         CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
+        // TODO 默认是没有订单
         currentOrderInfoVo.setIsHasCurrentOrder(false);
         return Result.ok(currentOrderInfoVo);
     }
