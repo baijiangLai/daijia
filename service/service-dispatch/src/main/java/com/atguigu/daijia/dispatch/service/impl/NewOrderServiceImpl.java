@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -148,5 +149,31 @@ public class NewOrderServiceImpl implements NewOrderService {
                 redisTemplate.expire(key,RedisConstant.DRIVER_ORDER_TEMP_LIST_EXPIRES_TIME, TimeUnit.MINUTES);
             }
         });
+    }
+
+
+    //获取最新订单
+    @Override
+    public List<NewOrderDataVo> findNewOrderQueueData(Long driverId) {
+        List<NewOrderDataVo> list = new ArrayList<>();
+        String key = RedisConstant.DRIVER_ORDER_TEMP_LIST + driverId;
+        Long size = redisTemplate.opsForList().size(key);
+        // 在放入数据的时候使用的是lpush，此时取数据是lpop，放入是1,2,3，取数据得到的结果是3,2,1
+        if(size > 0) {
+            for (int i = 0; i < size; i++) {
+                String content = (String)redisTemplate.opsForList().leftPop(key);
+                NewOrderDataVo newOrderDataVo = JSONObject.parseObject(content,NewOrderDataVo.class);
+                list.add(newOrderDataVo);
+            }
+        }
+        return list;
+    }
+
+    //清空队列数据
+    @Override
+    public Boolean clearNewOrderQueueData(Long driverId) {
+        String key = RedisConstant.DRIVER_ORDER_TEMP_LIST + driverId;
+        redisTemplate.delete(key);
+        return true;
     }
 }
