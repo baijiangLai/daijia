@@ -27,14 +27,12 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @Operation(summary = "查找乘客端当前订单")
+    @Operation(summary = "司机端查找当前订单")
     @GuiguLogin
-    @GetMapping("/searchCustomerCurrentOrder")
-    public Result<CurrentOrderInfoVo> searchCustomerCurrentOrder() {
-        CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
-        // TODO 默认是没有订单
-        currentOrderInfoVo.setIsHasCurrentOrder(false);
-        return Result.ok(currentOrderInfoVo);
+    @GetMapping("/searchDriverCurrentOrder")
+    public Result<CurrentOrderInfoVo> searchDriverCurrentOrder() {
+        Long driverId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.searchDriverCurrentOrder(driverId));
     }
 
 
