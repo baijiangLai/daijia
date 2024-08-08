@@ -131,4 +131,11 @@ public class LocationServiceImpl implements LocationService {
         redisTemplate.opsForValue().set(key,orderLocationVo);
         return true;
     }
+
+    @Override
+    public OrderLocationVo getCacheOrderLocation(Long orderId) {
+        String key = RedisConstant.UPDATE_ORDER_LOCATION + orderId;
+        OrderLocationVo orderLocationVo = (OrderLocationVo)redisTemplate.opsForValue().get(key);
+        return orderLocationVo;
+    }
 }
