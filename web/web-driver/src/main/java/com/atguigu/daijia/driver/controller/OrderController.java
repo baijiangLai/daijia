@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class OrderController {
 
+    @Autowired
+    private OrderService orderService;
+
     @Operation(summary = "查找乘客端当前订单")
     @GuiguLogin
     @GetMapping("/searchCustomerCurrentOrder")
@@ -26,6 +30,15 @@ public class OrderController {
         CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
         currentOrderInfoVo.setIsHasCurrentOrder(false);
         return Result.ok(currentOrderInfoVo);
+    }
+
+
+
+    @Operation(summary = "查询订单状态")
+    @GuiguLogin
+    @GetMapping("/getOrderStatus/{orderId}")
+    public Result<Integer> getOrderStatus(@PathVariable Long orderId) {
+        return Result.ok(orderService.getOrderStatus(orderId));
     }
 }
 
