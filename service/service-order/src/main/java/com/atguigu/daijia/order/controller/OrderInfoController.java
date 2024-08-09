@@ -108,5 +108,18 @@ public class OrderInfoController {
         pageVo.setLimit(limit);
         return Result.ok(pageVo);
     }
+
+    @Operation(summary = "获取司机订单分页列表")
+    @GetMapping("/findDriverOrderPage/{driverId}/{page}/{limit}")
+    public Result<PageVo> findDriverOrderPage(
+            @PathVariable Long driverId,
+            @PathVariable Long page,
+            @PathVariable Long limit) {
+        Page<OrderInfo> pageParam = new Page<>(page, limit);
+        PageVo pageVo = orderInfoService.findDriverOrderPage(pageParam, driverId);
+        pageVo.setPage(page);
+        pageVo.setLimit(limit);
+        return Result.ok(pageVo);
+    }
 }
 

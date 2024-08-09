@@ -20,5 +20,22 @@
           and info.is_deleted =0
         order by info.create_time desc
     </select>
+
+    <select id="selectDriverOrderPage" resultType="com.atguigu.daijia.model.vo.order.OrderListVo">
+        select
+            info.id,
+            info.order_no,
+            info.start_location,
+            info.end_location,
+            real_amount as pay_amount,
+            if(info.status &lt; 7, info.expect_amount, info.real_amount) as amount,
+
+            info.status,
+            info.create_time
+        from order_info info
+        where info.driver_id = #{driverId}
+          and info.is_deleted =0
+        order by info.create_time desc
+    </select>
 </mapper>
 
