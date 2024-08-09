@@ -52,6 +52,12 @@ public class WxPayServiceImpl implements WxPayService {
     @Autowired
     private RabbitService rabbitService;
 
+    @Autowired
+    private OrderInfoFeignClient orderInfoFeignClient;
+
+    @Autowired
+    private DriverAccountFeignClient driverAccountFeignClient;
+
     @Override
     public WxPrepayVo createWxPayment(PaymentInfoForm paymentInfoForm) {
         try {
@@ -205,13 +211,27 @@ public class WxPayServiceImpl implements WxPayService {
     }
 
     //支付成功后续处理
+    //支付成功后续处理
     @Override
     public void handleOrder(String orderNo) {
         //1 远程调用：更新订单状态：已经支付
+        orderInfoFeignClient.updateOrderPayStatus(orderNo);
 
-        //2 远程调用：获取系统奖励，打入到司机账户
+        //2 远程调用：获取系统奖励
+        OrderRewardVo orderRewardVo = orderInfoFeignClient.getOrderRewardFee(orderNo).getData();
 
-        //3 TODO 其他
+        // 3. 将系统奖励发放给司机
+        if(orderRewardVo != null && orderRewardVo.getRewardFee().doubleValue()>0) {
+            TransferForm transferForm = new TransferForm();
+            transferForm.setTradeNo(orderNo);
+            transferForm.setTradeType(TradeType.REWARD.getType());
+            transferForm.setContent(TradeType.REWARD.getContent());
+            transferForm.setAmount(orderRewardVo.getRewardFee());
+            transferForm.setDriverId(orderRewardVo.getDriverId());
+            driverAccountFeignClient.transfer(transferForm);
+        }
+
+        //4 TODO 其他
 
     }
 
