@@ -105,4 +105,34 @@ public class WxPayServiceImpl implements WxPayService {
         }
     }
 
+    //查询支付状态
+    @Override
+    public Boolean queryPayStatus(String orderNo) {
+        //1 创建微信操作对象
+        JsapiServiceExtension service =
+                new JsapiServiceExtension.Builder().config(rsaAutoCertificateConfig).build();
+
+        //2 封装查询支付状态需要参数
+        QueryOrderByOutTradeNoRequest queryRequest = new QueryOrderByOutTradeNoRequest();
+        queryRequest.setMchid(wxPayV3Properties.getMerchantId());
+        queryRequest.setOutTradeNo(orderNo);
+
+        //3 调用微信操作对象里面方法实现查询操作
+        Transaction transaction = service.queryOrderByOutTradeNo(queryRequest);
+
+        //4 查询返回结果，根据结果判断
+        if(transaction != null
+                && transaction.getTradeState() == Transaction.TradeStateEnum.SUCCESS) {
+            //5 如果支付成功，调用其他方法实现支付后处理逻辑
+            handlePayment(transaction);
+
+            return true;
+        }
+        return false;
+    }
+
+    private void handlePayment(Transaction transaction) {
+
+    }
+
 }

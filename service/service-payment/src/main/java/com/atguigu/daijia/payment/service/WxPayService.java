@@ -7,4 +7,6 @@ public interface WxPayService {
 
 
     WxPrepayVo createWxPayment(PaymentInfoForm paymentInfoForm);
+
+    Boolean queryPayStatus(String orderNo);
 }
