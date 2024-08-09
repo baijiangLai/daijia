@@ -29,4 +29,21 @@ public interface CustomerInfoFeignClient {
      */
     @PostMapping("/customer/info/updateWxPhoneNumber")
     Result<Boolean> updateWxPhoneNumber(@RequestBody UpdateWxPhoneForm updateWxPhoneForm);
+
+
+    /**
+     * 获取客户OpenId
+     * @param customerId
+     * @return
+     */
+    @GetMapping("/customer/info/getCustomerOpenId/{customerId}")
+    Result<String> getCustomerOpenId(@PathVariable("customerId") Long customerId);
+
+    /**
+     * 获取司机OpenId
+     * @param driverId
+     * @return
+     */
+    @GetMapping("/driver/info/getDriverOpenId/{driverId}")
+    Result<String> getDriverOpenId(@PathVariable("driverId") Long driverId);
 }
