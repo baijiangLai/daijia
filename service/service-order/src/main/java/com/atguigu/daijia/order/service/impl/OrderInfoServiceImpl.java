@@ -21,6 +21,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.redisson.api.RBlockingDeque;
+import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
@@ -70,15 +72,37 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setStatus(OrderStatus.WAITING_ACCEPT.getStatus());
         orderInfoMapper.insert(orderInfo);
 
+        //生成订单之后，发送延迟消息
+        sendDelayMessage(orderInfo.getId());
+
         //记录日志
         log(orderInfo.getId(),orderInfo.getStatus());
 
-        //向redis添加标识，减少对数据库访问压力
+        //向redis添加标识
         //接单标识，标识不存在了说明不在等待接单状态了
         redisTemplate.opsForValue().set(RedisConstant.ORDER_ACCEPT_MARK,
                 "0", RedisConstant.ORDER_ACCEPT_MARK_EXPIRES_TIME, TimeUnit.MINUTES);
 
         return orderInfo.getId();
+    }
+
+    /**
+     * 发送延迟消息
+     */
+    private void sendDelayMessage(Long orderId) {
+        try {
+            //  创建一个队列
+            RBlockingDeque<Object> blockingDeque = redissonClient
+                    .getBlockingDeque("queue_cancel");
+            //  将队列放入延迟队列中
+            RDelayedQueue<Object> delayedQueue = redissonClient
+                    .getDelayedQueue(blockingDeque);
+            //  发送的内容
+            delayedQueue.offer(orderId.toString(),
+                    15, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void log(Long orderId, Integer status) {
@@ -511,5 +535,21 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderRewardVo.setDriverId(orderInfo.getDriverId());
         orderRewardVo.setRewardFee(orderBill.getRewardFee());
         return orderRewardVo;
+    }
+
+    @Override
+    public void orderCancel(long orderId) {
+        //orderId查询订单信息
+        OrderInfo orderInfo = orderInfoMapper.selectById(orderId);
+        //判断
+        if(orderInfo.getStatus()==OrderStatus.WAITING_ACCEPT.getStatus()) {
+            //修改订单状态：取消状态
+            orderInfo.setStatus(OrderStatus.CANCEL_ORDER.getStatus());
+            int rows = orderInfoMapper.updateById(orderInfo);
+            if(rows == 1) {
+                //删除接单标识
+                redisTemplate.delete(RedisConstant.ORDER_ACCEPT_MARK);
+            }
+        }
     }
 }
