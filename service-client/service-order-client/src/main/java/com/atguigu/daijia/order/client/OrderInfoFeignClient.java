@@ -9,6 +9,7 @@ import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.vo.base.PageVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.model.vo.order.OrderBillVo;
+import com.atguigu.daijia.model.vo.order.OrderProfitsharingVo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -141,4 +142,13 @@ public interface OrderInfoFeignClient {
      */
     @GetMapping("/order/info/getOrderBillInfo/{orderId}")
     Result<OrderBillVo> getOrderBillInfo(@PathVariable("orderId") Long orderId);
+
+
+    /**
+     * 根据订单id获取实际分账信息
+     * @param orderId
+     * @return
+     */
+    @GetMapping("/order/info/getOrderProfitsharing/{orderId}")
+    Result<OrderProfitsharingVo> getOrderProfitsharing(@PathVariable("orderId") Long orderId);
 }
